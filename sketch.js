@@ -1,85 +1,61 @@
-let position;
-let velocity;
+// おふざけ版
+
+let player;
 let enemyGroup;
-
-let mySplite;
-
-let doo;
-let re;
-let mi;
-let fa;
-let so;
-let ra;
-let si;
-// ↑音の宣言
-
-let x = 0;
-//↑右端に⚪︎が行ったら、画面左端に⚪︎が戻るためのセットアップ
-
+let tigauyo, orotimaru;
 
 function preload() {
-	doo = loadSound('maou_se_inst_piano2_1do.mp3');
-	re = loadSound('maou_se_inst_piano2_2re.mp3');
-	mi = loadSound('maou_se_inst_piano2_3mi.mp3');
-	fa = loadSound('maou_se_inst_piano2_4fa.mp3');
-	so = loadSound('maou_se_inst_piano2_5so.mp3');
-	ra = loadSound('maou_se_inst_piano2_6ra.mp3');
-	si = loadSound('maou_se_inst_piano2_7si.mp3');
+	// 音声ファイルの読み込み（ファイルが存在しない場合はエラーをキャッチ）
+	try {
+		tigauyo = loadSound('2025-05-26 17-40-46.mp3');
+		orotimaru = loadSound('2025-05-26 17-40-40_1.mp3');
+	} catch (error) {
+		console.log('音声ファイルが見つかりません。音声なしで実行します。');
+	}
 }
-// ↑音の鳴るエリア
+// ↑画像
 
 function setup() {
+	createCanvas(windowWidth, windowHeight);
+	background(100);
 
+	player = createSprite(200, 500, 50, 50);
 
+	leftwall = new Sprite(0, windowHeight / 2, 10, height, 'static');
+	rightwall = new Sprite(windowWidth, windowHeight / 2, 10, height, 'static');
+	//↑壁
 
-	new Canvas(1200, 780);
-	noStroke();
-	world.gravity.y = 10;
 	enemyGroup = new Group();
-
-	position = new p5.Vector(0, 0);
-	velocity = new p5.Vector(10, -14);
-	//↑動く方向と強さ
-
-	mySprite = new Sprite();
-	mySprite.pos = position;
-	mySprite.diameter = 120;
-	mySprite.points = 0;
-	mySprite.overlaps(enemyGroup, collect);
-	//↑でっかい〇の設定
-
-
-
-	// ブロック
-	for (let i = 0; i < 150; i++) {
-		let obstacle = new Sprite(random(0, width), random(0, height), 50, 50);
-		obstacle.velocity.y = 5;
-		obstacle.collider = 'static';
-		enemyGroup.add(obstacle);
-		// ちっちゃい□
-	}
+	wallGroup = new Group();
 }
-
-function collect(mySprite, enemyGroup) {
-	let music = random([doo, re, mi, fa, so, ra, si]);
-	enemyGroup.remove();
-	mySprite.points += 1;
-	music.play();
-}
-//↑ちっちゃい□に触ったらランダムに音を鳴らしてポイント加算
+// ↑グループ作成
 
 function draw() {
-	background(255 * 0.9);
-	clear();
-	mySprite.text = mySprite.points;
+	background(100);
 
-	if (mySprite.position.x > width) {
-		mySprite.position.x = 0;
-	}
-	//↑右端に⚪︎が行ったら、画面左端に⚪︎が戻るためのコード
+	player.moveTowards(mouse);
 
-	// マウスクリックしたら動く
-	if (mouse.pressing()) {
-		mySprite.velocity = new p5.Vector(5, -7);
+	if (frameCount % 30 === 0) {
+		let obstacle = new Sprite(random(0, width), 0, random(5, 100), random(5, 100));
+		obstacle.velocity.y = 5;
+		enemyGroup.add(obstacle);
 	}
+// ↑降ってくる奴ら
+
+	if (enemyGroup.overlap(leftwall)) {
+		enemyGroup.color = 'white';
+		if (tigauyo) tigauyo.play();
+	}
+// ↑左の壁に当たったら「それは違うよ！」って言って□が白くなる
+
+	if (enemyGroup.overlap(rightwall)) {
+		enemyGroup.color = 'black';
+		if (orotimaru) orotimaru.play();
+	}
+// ↑右の壁に当たったら「潜影蛇手！」って言って□黒くなる
+
+	if (player.collide(enemyGroup)) {
+		console.log("その言葉 斬らせてもらう！")
+	}
+// ↑当たった時の判定確認用特に意味はない。反論ショーダウン好き
 }
